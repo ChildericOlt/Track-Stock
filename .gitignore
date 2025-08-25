@@ -23,3 +23,8 @@ yarn-debug.log*
 yarn-error.log*
 
 .env
+venv/
+__pycache__/
+*.pyc
+
+stock-track-470021-a84d66846fe9.json
