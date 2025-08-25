@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient';
+import DataUpload from './dataUpload.js';
 
 export default function Dashboard({ session }) {
   // Function to handle user sign out
@@ -16,6 +17,9 @@ export default function Dashboard({ session }) {
       <h1>Tableau de bord</h1>
       <p>Bienvenue sur votre tableau de bord. Vous êtes connecté.</p>
       <p>Votre email : {session.user.email}</p>
+      
+      <DataUpload />
+
       <button className="button block" onClick={handleSignOut}>
         Se déconnecter
       </button>

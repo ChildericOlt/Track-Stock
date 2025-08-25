@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
-import Auth from './auth';
-import Dashboard from './Dashboard';
+import { supabase } from './supabaseClient.js';
+import Auth from './auth.js';
+import Dashboard from './dashboard.js';
 import './App.css';
 
 function App() {
