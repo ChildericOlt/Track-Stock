@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { gql, useMutation } from '@apollo/client';
+import { useMutation, gql } from 'urql';
 
 // 1. Define the GraphQL mutation for file upload
 const UPLOAD_FILE_MUTATION = gql`
@@ -14,13 +14,14 @@ const UPLOAD_FILE_MUTATION = gql`
 
 const DataUpload = () => {
   const [file, setFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
+  const [message, setMessage] = useState('');
 
-  // 2. Use the `useMutation` hook from Apollo Client
-  const [uploadFile, { loading }] = useMutation(UPLOAD_FILE_MUTATION);
-const handleFileChange = (event) => {
+  // 2. Use the `useMutation` hook from urql
+  const [uploadFileResult, uploadFile] = useMutation(UPLOAD_FILE_MUTATION);
+
+  const handleFileChange = (event) => {
     setFile(event.target.files[0]);
-    setMessage(''); // Clear message on new file selection
+    setMessage('');
   };
 
   const handleUpload = async () => {
@@ -29,27 +30,24 @@ const handleFileChange = (event) => {
       return;
     }
 
-    try {
-      // 3. Call the mutation
-      const { data } = await uploadFile({
-        variables: {
-          fileInput: {
-            filename: file.name,
-            file_content: file,
-          },
-        },
-      });
+    // Call the mutation with the file content
+    const variables = {
+      fileInput: {
+        filename: file.name,
+        file_content: file,
+      },
+    };
 
-      // 4. Handle the response from the GraphQL API
-      if (data.uploadSalesData.success) {
-        setMessage(`File uploaded successfully to: ${data.uploadSalesData.filePath}`);
-        setFile(null); // Clear file input
-      } else {
-        setMessage(`Error uploading file: ${data.uploadSalesData.message}`);
-      }
-    } catch (error) {
+    const { data, error } = await uploadFile(variables);
+
+    if (error) {
       setMessage(`An error occurred: ${error.message}`);
       console.error('Upload error:', error);
+    } else if (data.uploadSalesData.success) {
+      setMessage(`File uploaded successfully to: ${data.uploadSalesData.filePath}`);
+      setFile(null);
+    } else {
+      setMessage(`Error uploading file: ${data.uploadSalesData.message}`);
     }
   };
 
@@ -58,8 +56,8 @@ const handleFileChange = (event) => {
       <h2>Import your sales data</h2>
       <p>Please select a CSV or Excel file containing your sales history.</p>
       <input type="file" onChange={handleFileChange} accept=".csv, .xlsx" />
-      <button onClick={handleUpload} disabled={loading || !file}>
-        {loading ? "Uploading..." : "Start Analysis"}
+      <button onClick={handleUpload} disabled={uploadFileResult.fetching || !file}>
+        {uploadFileResult.fetching ? "Uploading..." : "Start Analysis"}
       </button>
       {message && <p>{message}</p>}
     </div>
